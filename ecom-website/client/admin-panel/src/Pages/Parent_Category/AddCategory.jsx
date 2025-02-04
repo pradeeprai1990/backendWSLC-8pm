@@ -4,13 +4,20 @@ import axios, { toFormData } from "axios";
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 export default function AddCategory() {
+  let apiBaseUrl=import.meta.env.VITE_APIBASEPATH;
+
+
   let navigate=useNavigate()
   let saveCategory=(event)=>{
+
+
+
+
     event.preventDefault()
 
     let formValue=new FormData(event.target)
    
-    axios.post(`http://localhost:8080/admin/category/add`,formValue)
+    axios.post(`${apiBaseUrl}admin/category/add`,formValue)
     .then((res)=>{
        if(res.data.status){
          toast.success(res.data.msg)

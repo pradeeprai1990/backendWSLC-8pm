@@ -1,6 +1,6 @@
 let express=require('express');
 let multer=require("multer")
-const { categoryAdd, categoryView, categoryDelete, categoryEdit } = require('../../controller/admin/categoryController');
+const { categoryAdd, categoryView,  categoryEdit, categorysigleDelete, categorymultipleDelete } = require('../../controller/admin/categoryController');
 let categoryRoute=express.Router();
 
 let storage=multer.diskStorage({
@@ -22,7 +22,10 @@ categoryRoute.post("/add",uploads.single('categoryImage'),categoryAdd) //http://
 
 categoryRoute.get("/view",categoryView)
 
-categoryRoute.delete("/delete/:id",categoryDelete)
+categoryRoute.delete("/delete/:id",categorysigleDelete)
+
+categoryRoute.post("/muldelete/",categorymultipleDelete)
+
 
 categoryRoute.get("/editRow/:id",categoryEdit)
 
