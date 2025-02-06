@@ -72,18 +72,37 @@ let categorymultipleDelete=async (req, res)=>{
 
     let {allIDS}=req.body; //Array
 
-    for(let id of allIDS){
-        let getDeleleData=await categoryModel.findOne({_id:id})
+    //Old Code Multiple Delete
 
-        let imageName=getDeleleData.catImage
+    // for(let id of allIDS){
+    //     let getDeleleData=await categoryModel.findOne({_id:id})
 
+    //     let imageName=getDeleleData.catImage
+
+    //     let path=`uploads/category/${imageName}`
+    //     fs.unlinkSync(path)
+
+    //     //Data Delete From CategoryModel
+
+    //     let delRes=await categoryModel.deleteOne({_id:id})
+    // }
+
+    //New Code
+    // let getDeleleData=await categoryModel.find({_id:{$in:allIDS}}).select('catImage')
+
+    let getAllImageName=await categoryModel.find({_id:{$in:allIDS}}).select('catImage')
+
+    console.log(getAllImageName)
+    //"select catImage from category where _id in (10,11,12)"
+
+    for(let items of getAllImageName){
+        let imageName=items.catImage
         let path=`uploads/category/${imageName}`
         fs.unlinkSync(path)
-
         //Data Delete From CategoryModel
-
-        let delRes=await categoryModel.deleteOne({_id:id})
     }
+
+     let delRes=await categoryModel.deleteMany({_id:{$in:allIDS}})
    
     let resObj={
         status:1,
@@ -94,10 +113,52 @@ let categorymultipleDelete=async (req, res)=>{
 }
 
 
-let categoryEdit= (req, res)=>{
-    res.send("Category categoryEdit")
+let categoryEdit=async (req, res)=>{
+    let {id}=req.params;
+    let data=await categoryModel.findOne({_id:id})
+    let resObj={
+        status:1,
+        data,
+        staticPath:"uploads/category/"
+       
+    }
+    res.send(resObj)
 }
 
-module.exports = {categoryAdd,categoryView,categorysigleDelete,categorymultipleDelete,categoryEdit}
+
+let categoryUpdate=async (req,res)=>{
+    let {id}=req.params;
+    let {categoryName, categoryDescription,status}=req.body
+
+    console.log(req.body)
+    let upObj={
+        catName:categoryName,
+        categoryDesc:categoryDescription,
+        catStatus:status,
+        
+    }
+    if(req.file){
+        if(req.file.filename){
+            upObj['catImage']=req.file.filename
+        }
+    }
+
+    try{
+        let category=await categoryModel.updateOne({_id:id},{$set:upObj})
+       
+        let resObj={
+            status:1,
+            msg:"Category Updated",
+            category
+        }
+        res.send(resObj)
+    }
+    catch(error){
+        res.send(error)
+    }
+
+}
+
+module.exports = {categoryAdd,categoryView,categorysigleDelete,categorymultipleDelete,categoryEdit,categoryUpdate}
 
 //http://localhost:8080/uploads/category/senior-768w.jpg
