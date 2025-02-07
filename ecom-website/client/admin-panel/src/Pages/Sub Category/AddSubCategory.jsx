@@ -1,7 +1,44 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Breadcrumb from "../../common/Breadcrumb";
+import { useState } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 export default function AddSubCategory() {
+  let [category,setCategory]=useState([])
+  let apiBaseUrl = import.meta.env.VITE_APIBASEPATH;
+  let getParentCategory=()=>{
+    axios.get(`${apiBaseUrl}admin/subcategory/parent-category`)
+    .then((res)=>res.data)
+    .then((finalRes)=>{
+      setCategory(finalRes.data)
+    })
+  }
+  let {id}=useParams();
+  let savesubCategory = (event) => {
+    
+    event.preventDefault()
+
+    let formValue = new FormData(event.target)
+    if(id==undefined){
+      axios.post(`${apiBaseUrl}admin/subcategory/add`, formValue)
+      .then((res) => {
+        // if (res.data.status) {
+        //   toast.success(res.data.msg)
+        //   setTimeout(() => {
+        //     navigate('/parent-category/view-category')
+        //   }, 2000)
+        // }
+        // else {
+        //   toast.error("Category Name All ready exist...")
+        // }
+      })
+    }
+
+  }
+  useEffect(()=>{
+    getParentCategory()
+  },[])
   return (
     <section className="w-full">
           <Breadcrumb
@@ -14,7 +51,7 @@ export default function AddSubCategory() {
               <h3 className="text-[26px] font-semibold bg-slate-100 py-3 px-4 rounded-t-md border border-slate-400">
                 Add Sub Category
               </h3>
-              <form className="border border-t-0 p-3 rounded-b-md border-slate-400">
+              <form onSubmit={savesubCategory} className="border border-t-0 p-3 rounded-b-md border-slate-400">
                 <div className="mb-5">
                   <label
                     for="base-input"
@@ -40,13 +77,15 @@ export default function AddSubCategory() {
 
                   <select
                     id="default"
-                    name="parentCatSelectBox"
+                    name="parentCategory"
                     className=" border-2 border-gray-300 text-gray-900 mb-6 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                   >
                     <option selected>--Select Category--</option>
-                    <option value="Mens">Men's</option>
-                    <option value="Women">Women</option>
-                    <option value="Sale">Sale</option>
+                    {
+                    category.map((items,index)=>  <option key={index} value={items._id}>
+                      {items.catName}
+                    </option>)
+                    }
                   </select>
                 </div>
                 <div className="mb-5">
@@ -56,13 +95,13 @@ export default function AddSubCategory() {
                   >
                     Category Image
                   </label>
-                  <form className="max-w-full">
+                 
                     <label for="file-input" className="sr-only">
                       Choose file
                     </label>
                     <input
                       type="file"
-                      name="subCatFile-input"
+                      name="subCategoryImage"
                       id="file-input"
                       className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none  
     file:bg-gray-50 file:border-0
@@ -71,7 +110,7 @@ export default function AddSubCategory() {
     "
                       multiple
                     />
-                  </form>
+                  
                 </div>
                 <div className="mb-5">
                   <label
@@ -95,7 +134,7 @@ export default function AddSubCategory() {
                       id="link-radio"
                       name="status"
                       type="radio"
-                      value=""
+                      value="1"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 "
                     ></input>
                     Active
@@ -103,7 +142,7 @@ export default function AddSubCategory() {
                       id="link-radio"
                       name="status"
                       type="radio"
-                      value=""
+                      value="0"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 "
                     ></input>
                     Deactive
