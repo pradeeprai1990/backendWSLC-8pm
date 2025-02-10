@@ -1,11 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "../../common/Sidebar";
 import Header from "../../common/Header";
 import Breadcrumb from "../../common/Breadcrumb";
 import Footer from "../../common/Footer";
 import { ChromePicker } from "react-color";
+import axios from "axios";
 
 export default function AddColor() {
+  let apiBaseUrl = import.meta.env.VITE_APIBASEPATH;
+  let [formData,setFormData]=useState({colorName:'',colorCode:"#ccc",colorStatus:true})
+
+
+  let getValueSetvalue=(event)=>{
+    let olddata={...formData}
+    let inputName=event.target.name;
+    let inputValue=event.target.value;
+    olddata[inputName]=inputValue; 
+    setFormData(olddata)
+  }
+
+  let saveColor=(event)=>{
+    event.preventDefault()
+    axios.post(`${apiBaseUrl}admin/color/add`, formData)
+    .then((res)=>{
+      console.log(res.formData)
+    })
+  }
+
   return (
     <>
     <Breadcrumb path={"Colors"} path2={"Add Color"} slash={"/"} />
@@ -14,7 +35,7 @@ export default function AddColor() {
               <h3 className="text-[20px] font-semibold bg-slate-100 py-2 px-3 rounded-t-md border border-slate-400">
                 Add colors
               </h3>
-              <form className="p-3 border border-t-0 rounded-b-md border-slate-400">
+              <form onSubmit={saveColor} className="p-3 border border-t-0 rounded-b-md border-slate-400">
                 <div className="mb-5">
                   <label
                     for="base-input"
@@ -25,6 +46,7 @@ export default function AddColor() {
                   <input
                     type="text"
                     name="colorName"
+                    onChange={getValueSetvalue}
                     id="base-input"
                     className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3 "
                     placeholder="Color Name"
@@ -37,7 +59,11 @@ export default function AddColor() {
                   >
                     Color Picker
                   </label>
-                  <ChromePicker />
+                  <ChromePicker color={formData.colorCode}  onChangeComplete={(event)=>{
+                      let olddata={...formData}
+                      olddata['colorCode'] = event.hex
+                      setFormData(olddata)
+                  }} />
                   <br />
                 </div>
                 <div className="pe-5 ps-1">
@@ -47,7 +73,8 @@ export default function AddColor() {
                       id="link-radio"
                       name="colorStatus"
                       type="radio"
-                      value=""
+                      onChange={getValueSetvalue}
+                      value="1"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 "
                     ></input>
                     Active
@@ -55,7 +82,8 @@ export default function AddColor() {
                       id="link-radio"
                       name="colorStatus"
                       type="radio"
-                      value=""
+                      onChange={getValueSetvalue}
+                      value="0"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 "
                     ></input>
                     Deactive

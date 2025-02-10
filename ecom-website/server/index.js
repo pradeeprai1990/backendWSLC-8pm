@@ -11,6 +11,9 @@ app.use(mainRoute)
 
 app.use("/uploads/category",express.static("uploads/category"))
 
+app.use("/uploads/subcategory",express.static("uploads/subcategory"))
+
+
 
 
 

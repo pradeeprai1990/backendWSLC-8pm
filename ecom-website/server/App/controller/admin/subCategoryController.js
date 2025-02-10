@@ -8,8 +8,7 @@ let subcategoryAdd =async (req, res) => {
         subcategoryName:subCategoryName,
         subcategoryDesc:subcatDescription,
         parentCategory,
-        subcategoryStatus:status,
-        
+        subcategoryStatus:status,   
     }
     if(req.file){
         if(req.file.filename){
@@ -38,12 +37,12 @@ let subcategoryAdd =async (req, res) => {
 }
 
 let subcategoryView = async (req, res) => {
-    let categoryData=await categoryModel.find()
+    let subcategoryData=await subcategoryModel.find().populate('parentCategory','catName')
     let resObj={
         status:1,
         msg:"Data View",
-        data:categoryData,
-        staticPath:"uploads/category/"
+        data:subcategoryData,
+        staticPath:"uploads/subcategory/"
     }
     res.send(resObj)
 }
