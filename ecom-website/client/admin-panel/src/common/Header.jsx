@@ -1,6 +1,19 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 export default function Header() {
+  let loginData=useSelector((myAllStore)=>{
+   return  myAllStore.loginStore.adminDetails
+  })  
+
+ let navigator= useNavigate();
+
+  useEffect(()=>{
+    if(loginData==null){
+        navigator("/")
+    }
+  },[loginData])
   return (
     <header className='border-b-2'>
     <nav className="bg-white border-gray-200 px-4 lg:px-6 py-2.5">

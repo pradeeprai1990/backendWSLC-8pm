@@ -21,6 +21,8 @@ let subcategoryAdd =async (req, res) => {
         
 
         let subcategory=new subcategoryModel(insObj)
+        
+        subcategoryModel.find({subcategoryName,parentCategory})
         let insertRes=await subcategory.save()
         let resObj={
             status:1,

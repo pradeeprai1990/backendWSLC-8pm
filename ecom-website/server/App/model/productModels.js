@@ -35,9 +35,7 @@ let productSchema=new mongoose.Schema(
     productSize:[
         {type: mongoose.Types.ObjectId, ref: "size"}
     ],
-    productImage:String,
-    
-    productDesc:String,
+   
     productStatus:Boolean
 },{
     timestamps:true

@@ -3,6 +3,7 @@ let fs = require("fs")
 const sizeModel = require("../../model/sizeModel")
 const colorModel = require("../../model/colorModel")
 const subcategoryModel = require("../../model/subCategoryModel")
+const productModel = require("../../model/productModels")
 let productAdd = async (req, res) => {
     let { productName, productDescription, productShortDescription, productPrice, productMRP, parentCategory, subCategory, productSize, productColors, status } = req.body;
     let insertOBJ = {
@@ -21,13 +22,37 @@ let productAdd = async (req, res) => {
 
     console.log(insertOBJ)
 
-    console.log(req.files)
-    res.send("Product Add")
+   if(req.files){
+        if(req.files.productImage){
+            insertOBJ['productImage']=req.files.productImage[0].filename
+        }
+        if(req.files.productAnimationImage){
+            insertOBJ['productAnimationImage']=req.files.productAnimationImage[0].filename
+        }
+        if(req.files.productGallery){
+            let allGalleryImages=req.files.productGallery.map((items)=>items.filename)
+            insertOBJ['productGallery']=allGalleryImages
+        }
+   }
+    let product=new productModel(insertOBJ)
+    let insertRes=await product.save()
+    let resObj={
+        status:1,
+        msg:"Product Save",
+        insertRes
+    }
+    res.send(resObj)
 
 }
 
 let productView = async (req, res) => {
-
+    let product=await productModel.find().populate('parentCategory','catName').populate('subCategory','subcategoryName').populate('productSize','sizeName').populate('productColors','colorName')
+    let resObj={
+        status:1,
+        msg:"Product Show",
+        product
+    }
+    res.send(resObj)
 }
 
 
