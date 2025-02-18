@@ -13,7 +13,7 @@ export let loginSlice=createSlice({
         },
         logOut:(state)=>{
             state.adminDetails=null
-            Cookies.set("admin",JSON.stringify(null))
+            Cookies.remove('admin')
         }
     }
 })
