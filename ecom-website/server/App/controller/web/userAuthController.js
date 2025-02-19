@@ -1,33 +1,78 @@
+const { transporter } = require("../../config/mailConfig");
 const userModel = require("../../model/userModel");
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const OTPDATA = new Map();
 
+let sendOTP=async (req,res)=>{
+    let data=req.body; //
+    let {userEmail}=req.body
+       
+
+        let otp=  (Math.random()*99999).toString().slice(0,4)
+
+        OTPDATA.set("MYOTP",otp)
+       
+        const info = await transporter.sendMail({
+            from: '"OTP 👻" <pradeep.9997@gmail.com>', // sender address
+            to:userEmail , // list of receivers
+            subject: "OTP ✔", // Subject line
+            text: "OTP", // plain text body
+            html: `<b>${otp}</b>`, // html body
+          });
+          console.log(info)
+         let obj={
+            status:1,
+            msg:"OTP SEND"
+         } 
+       
+        res.send(obj)
+   
+
+
+}
 let createUser=async (req,res)=>{
      
     let insertObj=req.body; //
 
-    const salt = bcrypt.genSaltSync(saltRounds); //10
-    const password = bcrypt.hashSync(req.body.password, salt);
-    
-    insertObj['password']=password;
+    let myotp=OTPDATA.get("MYOTP") //mail Send OTP
+    let otp=req.body.otp;
 
-    try{
-        let insertUser=new userModel(insertObj)
-         let insertRes= await insertUser.save()
-         let resObj={
-            status:1,
-            mgs:"User Created",
-            insertRes
-         }
-         res.send(resObj)
+    if(myotp==otp){
+
+        const salt = bcrypt.genSaltSync(saltRounds); //10
+        const password = bcrypt.hashSync(req.body.password, salt);
+        
+        insertObj['password']=password;
+
+        try{
+            let insertUser=new userModel(insertObj)
+            let insertRes= await insertUser.save()
+            let resObj={
+                status:1,
+                mgs:"User Created",
+                insertRes
+            }
+            // OTPDATA.delete()
+            res.send(resObj)
+        }
+        catch(error){
+            let resObj={
+                status:0,
+                mgs:"Email Id Already Exist...",
+                error
+            }
+            res.send(resObj)
+        }
+
     }
-    catch(error){
+    else{
         let resObj={
             status:0,
-            mgs:"Email Id Already Exist...",
-            error
-         }
-         res.send(resObj)
+            mgs:"Invalid OTP",
+            
+        }
+        res.send(resObj)
     }
 
     //User Create
@@ -86,4 +131,4 @@ let login=async (req,res)=>{
     // }
 }
 
-module.exports={createUser,login}
+module.exports={createUser,login,sendOTP}
