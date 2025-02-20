@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import Header from "./common/Header";
 import Footer from "./common/Footer";
 import { usePathname } from "next/navigation";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
 
 export default function LayoutWrapper({ children }) {
 
@@ -21,12 +23,12 @@ export default function LayoutWrapper({ children }) {
   },[router])
 
   return (
-    <main>
+    <Provider store={store}>
       {/* <Header/> */}
       { removeCommons && <Header /> }
       {children}
       {removeCommons && <Footer /> }
       {/* <Footer/> */}
-    </main>
+    </Provider>
   );
 }

@@ -2,17 +2,13 @@ const { transporter } = require("../../config/mailConfig");
 const userModel = require("../../model/userModel");
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const OTPDATA = new Map();
+
 
 let sendOTP=async (req,res)=>{
     let data=req.body; //
     let {userEmail}=req.body
-       
-
         let otp=  (Math.random()*99999).toString().slice(0,4)
-
         OTPDATA.set("MYOTP",otp)
-       
         const info = await transporter.sendMail({
             from: '"OTP 👻" <pradeep.9997@gmail.com>', // sender address
             to:userEmail , // list of receivers
@@ -27,9 +23,6 @@ let sendOTP=async (req,res)=>{
          } 
        
         res.send(obj)
-   
-
-
 }
 let createUser=async (req,res)=>{
      
@@ -85,6 +78,7 @@ let login=async (req,res)=>{
     let loginDataCheckEmail=await userModel.findOne({userEmail:req.body.userEmail})
     if(loginDataCheckEmail){
         let userDbPassword= loginDataCheckEmail.password
+      
                         //pradeep123
         let passwordCheck=bcrypt.compareSync(req.body.password, userDbPassword); // true
         if(passwordCheck){
@@ -93,7 +87,7 @@ let login=async (req,res)=>{
                 mgs:"Login",
                 loginDataCheckEmail
              }
-                res.send(resObj)
+                res.status('200').json(resObj)
         }
         else{
             let resObj={
@@ -101,7 +95,7 @@ let login=async (req,res)=>{
                 mgs:"Invalid Password",
                 
              }
-            res.send(resObj)
+             res.status('200').json(resObj)
         }
     }
     else{
@@ -110,9 +104,9 @@ let login=async (req,res)=>{
                     mgs:"Invalid Email",
                     
                  }
-       res.send(resObj)
+                 res.status('200').json(resObj)
     }
-    res.send("hello")
+   
     // if(loginData){
     //     let resObj={
     //         status:1,

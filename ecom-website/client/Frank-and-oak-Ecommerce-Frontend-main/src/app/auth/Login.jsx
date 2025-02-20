@@ -6,6 +6,9 @@ import { BsArrowRight } from "react-icons/bs";
 import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { saveLoginDetails } from "../slice/userSlice";
+import { useRouter } from "next/navigation";
 export default function Login({ loginStatus, setLoginStatus }) {
   let [compStatus, setCompStatus] = useState(true)
   let [otpAfterSignUp, setotpAfterSignUp] = useState(false)
@@ -82,16 +85,44 @@ export default function Login({ loginStatus, setLoginStatus }) {
 
 
 function LoginBox() {
+  let apiBaseUrl=process.env.NEXT_PUBLIC_APIURL;
+  let router=useRouter()
+  let dispatch=useDispatch()
 
+  let loginUser=(event)=>{
+    event.preventDefault();
+    // let formUserData=new FormData(event.target)
+
+    let obj={
+      userEmail:event.target.userEmail.value,
+      password:event.target.password.value,
+     
+    }
+    
+
+    axios.post(`${apiBaseUrl}web/user/login`,obj)
+    .then((res)=>{
+        if(res.data.status){
+         
+           dispatch(saveLoginDetails(res.data.loginDataCheckEmail))
+           router.push('/user-dashboard/account')
+        }
+        else{
+          alert(res.data.mgs)
+        }
+       
+    })
+   
+  }
   return (
-    <div className="flex flex-col gap-3 py-6">
-      <input className="p-3 border text-[#757575] text-[14px] font-semibold border-[#757575] " type="text" placeholder="Email Address" />
-      <input className="p-3 border text-[#757575] text-[14px] font-semibold border-[#757575] " type="tel" placeholder="Password" />
+    <form onSubmit={loginUser} className="flex flex-col gap-3 py-6">
+      <input name="userEmail" className="p-3 border text-[#757575] text-[14px] font-semibold border-[#757575] " type="text" placeholder="Email Address" />
+      <input name="password" className="p-3 border text-[#757575] text-[14px] font-semibold border-[#757575] " type="tel" placeholder="Password" />
       <Link href="/account/forget-password">
         <span className="text-[13px] font-semibold underline">Forgot Password?</span>
       </Link>
       <button className="p-3.5 mt-2 bg-black text-white font-semibold">Log In</button>
-    </div>
+    </form>
   )
 }
 
