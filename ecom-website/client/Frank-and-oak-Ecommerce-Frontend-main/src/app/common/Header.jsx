@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { RxHamburgerMenu } from "react-icons/rx";
 import { CiSearch } from "react-icons/ci";
 import { FaRegUserCircle } from "react-icons/fa";
@@ -11,14 +11,36 @@ import Link from 'next/link';
 import { MenMegaMenu, OurStoryMegaMenu, ThisJustInMegaMenu, WomenMegaMenu } from './MegaMenu';
 import TextSlider from './TextSlider';
 import Cart from '../modals/Cart';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCart } from '../slice/cartSlice';
 export default function Header() {
   let [loginStatus,setLoginStatus]=useState(false)
   let [cartStatus,setCartStatus]=useState(false)
   let [menuHover,setMenuHover]=useState(0)
   let [sidebarStatus,setSidebarStatus]=useState(false)
+
+  let userData=useSelector((store)=>store.userStore.userDetails)
+
+
+  let dispatch=useDispatch()
+
+  dispatch(fetchCart())
   
+//  let cartData=useSelector(async (store)=>{
+//   let cartData=await  store.cartStore.cartItems
+//   console.log(cartData)
+//   let cartItems= await cartData.data
+//   console.log(cartItems)
+//  })
+
+  // useEffect(()=>{
+  //     console.log(cartData)
+  // },[cartData])
+
+
   return (
     <div className='fixed top-0 z-[999999999] w-full'>
+       <Login loginStatus={loginStatus} setLoginStatus={setLoginStatus} />
     <TextSlider/>
     <header className='shadow-md py-2 lg:py-1 px-2 sm:px-4 md:px-10 bg-white flex justify-between'>
       <div className='  flex gap-2 sm:gap-4 items-center  basis-[70%] md:basis-[20%] lg:basis-[15%]'>
@@ -51,10 +73,22 @@ export default function Header() {
           <CiSearch className='sm:w-7 sm:h-7 h-5 w-5'  />
           </Link>
           </li>
-          <li className='cursor-pointer' onClick={()=>setLoginStatus(true)}>
-          <FaRegUserCircle className='sm:w-[22px]  sm:h-7 h-5 w-[18px] ' />
-            <Login loginStatus={loginStatus} setLoginStatus={setLoginStatus} />
+          {
+          userData
+          ?
+            <Link href={'/user-dashboard/account'} className='cursor-pointer gap-10 flex' >
+            
+            <FaRegUserCircle className='sm:w-[22px]  sm:h-7 h-5 w-[18px] ' />
+            {userData.firstName}
+            </Link>
+            :
+            <li className='cursor-pointer' onClick={()=>setLoginStatus(true)}>
+             <FaRegUserCircle className='sm:w-[22px]  sm:h-7 h-5 w-[18px] ' />
+           
           </li>
+        
+          }
+          
           <li>
             <Link href={"/user-dashboard/wishlist"}>
           <FaRegHeart className='sm:w-[22px] sm:h-7 h-5 w-[18px] cursor-pointer' />

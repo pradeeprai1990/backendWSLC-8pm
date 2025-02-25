@@ -269,7 +269,20 @@ export default function ProductDetails() {
                   </select>
           </div>
           </div>
-            
+          <div className="pe-5 ps-1 py-4">
+          <span className="flex items-center gap-3">
+              Product Featured :
+                  <input
+                    id="link-radio"
+                    name='productFeatured'
+                    type="checkbox"
+                    value="1"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 "
+                  ></input>
+                  
+                </span>      
+
+            </div>      
               <div className="pe-5 ps-1">
                 <span className="flex items-center gap-3">
                   Status :

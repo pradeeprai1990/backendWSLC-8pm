@@ -142,7 +142,6 @@ let categoryUpdate=async (req,res)=>{
             upObj['catImage']=req.file.filename
         }
     }
-
     try{
         let category=await categoryModel.updateOne({_id:id},{$set:upObj})
        
@@ -158,6 +157,8 @@ let categoryUpdate=async (req,res)=>{
     }
 
 }
+
+
 
 module.exports = {categoryAdd,categoryView,categorysigleDelete,categorymultipleDelete,categoryEdit,categoryUpdate}
 

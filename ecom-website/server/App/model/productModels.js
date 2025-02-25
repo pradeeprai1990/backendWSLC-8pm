@@ -35,7 +35,11 @@ let productSchema=new mongoose.Schema(
     productSize:[
         {type: mongoose.Types.ObjectId, ref: "size"}
     ],
-   
+    productFeatured:{
+        type: String,
+        enum : ["1","0"], //
+        default: '0'
+    },
     productStatus:Boolean
 },{
     timestamps:true

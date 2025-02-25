@@ -3,6 +3,7 @@ let fs=require("fs")
 const subcategoryModel = require("../../model/subCategoryModel")
 let subcategoryAdd =async (req, res) => {
     let {subCategoryName, subcatDescription,parentCategory,status}=req.body
+    console.log(req.body)
 
     let insObj={
         subcategoryName:subCategoryName,
@@ -22,7 +23,7 @@ let subcategoryAdd =async (req, res) => {
 
         let subcategory=new subcategoryModel(insObj)
         
-        subcategoryModel.find({subcategoryName,parentCategory})
+    
         let insertRes=await subcategory.save()
         let resObj={
             status:1,

@@ -1,13 +1,40 @@
 "use client"
 import BreadCrumb from '@/app/common/BreadCrumb'
 import Header from '@/app/common/Header'
+import { logOut } from '@/app/slice/userSlice'
+import axios from 'axios'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { CiHeart } from "react-icons/ci";
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function Account() {
   let [accountSetting,setAccountSetting]=useState(false)
   let [resetPassword,setResetPassword]=useState(false)
+ let token =useSelector((store)=>store.userStore.token)
+ let apiBaseUrl=process.env.NEXT_PUBLIC_APIURL;
+  function changePasswordFunction(event){
+    let obj={
+      oldPassword:event.target.oldPassword.value,
+      newPassword:event.target.newPassword.value,
+      
+    }
+    axios.post(`${apiBaseUrl}web/user/change-password`,obj,
+      {
+         headers: {Authorization : `Bearer ${token}`},
+      }
+    )
+    .then((res)=>{
+      if(res.data.status){
+        alert(res.data.mgs)
+      }
+      else{
+        alert(res.data.mgs)
+      }
+    })
+    event.preventDefault()
+
+  }
   return (
     <>
       <section className="pt-28 px-[30px]">
@@ -93,17 +120,17 @@ export default function Account() {
                 <li className={`${resetPassword ? "hidden" : "block"} text-[13px] font-medium text-customGray`}>Password : <span className='text-black text-[20px]'>   &nbsp;•••••••••</span></li>
               </ul>
               {/* On click of Edit Button Start */}
-              <form className={`${resetPassword ? "block" : "hidden"} lg:w-[55%] w-full`}>
-                <h4 className='font-medium text-[26px] pb-5'>Reset Password</h4>
+              <form onSubmit={changePasswordFunction} className={`${resetPassword ? "block" : "hidden"} lg:w-[55%] w-full`}>
+                <h4 className='font-medium text-[26px] pb-5'>Change Password</h4>
                 <div className='space-y-4'>
                 <div className='relative'>
-                  <label htmlFor="password" className='block text-[13px] mb-1 font-medium'>Password</label>
-                  <input className='w-full border-black font-medium'  id='password' name='password' type="password" />
+                  <label htmlFor="password" className='block text-[13px] mb-1 font-medium'>Old Password</label>
+                  <input className='w-full border-black font-medium'  id='password' name='oldPassword' type="text" />
                   <button className='text-[13px] underline font-medium absolute right-3 top-[50%]'>Show</button>
                 </div>
                 <div className='relative'>
-                  <label htmlFor="confirmpassword" className='block text-[13px] mb-1 font-medium'>Confirm Password</label>
-                  <input className='w-full border-black font-medium'  id='confirmpassword' name='confirmpassword' type="password" />
+                  <label htmlFor="confirmpassword" className='block text-[13px] mb-1 font-medium'>New Password</label>
+                  <input className='w-full border-black font-medium'  id='confirmpassword' name='newPassword' type="text" />
                   <button className='text-[13px] underline font-medium absolute right-3 top-[50%]'>Show</button>
                 </div>
                 <div className='space-x-20 flex justify-end'>
@@ -125,6 +152,8 @@ export default function Account() {
 
 
 export function AccountSideBar() {
+
+  let dispatch=useDispatch();
   return (
     <div className='lg:block hidden h-screen'>
       <div className='bg-[#EBECEE] px-10 py-8'>
@@ -132,22 +161,16 @@ export function AccountSideBar() {
           <li className='font-medium text-[15px]'>
             <Link href={"/user-dashboard/order"}>Orders & returns</Link>
             </li>
-          <li className='font-medium text-[15px]'>Address book</li>
+         
           <li className='font-medium text-[15px]'>
           <Link href={"/user-dashboard/account"}>Account settings</Link>
           </li>
           <li className='font-medium text-[15px]'>
-          <Link href={"/user-dashboard/wishlist"} className='flex items-center gap-1'>Wishlist <CiHeart size={20} /></Link>
+          <button onClick={()=>dispatch(logOut())}>Log Out</button>
           </li>
-          <li className='font-medium text-[15px]'>Frank&apos;s Club</li>
-          <li className='font-medium text-[15px]'>Refer a Friend</li>
         </ul>
       </div>
-      <div className='bg-[#EBECEE] px-5 py-5 mt-6'>
-        <h3 className='text-[22px] font-semibold'>Need Help?</h3>
-        <p className='font-medium text-[15px] py-2'>Our Member Services team is online daily.</p>
-        <Link href="mailto:rosanchaurasia990@gmail.com">/ <span className='underline text-[15px] hover:font-semibold font-medium underline-offset-2'>Email</span></Link>
-      </div>
+      
     </div>
   )
 }

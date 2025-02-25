@@ -14,6 +14,8 @@ app.use("/uploads/category",express.static("uploads/category"))
 
 app.use("/uploads/subcategory",express.static("uploads/subcategory"))
 
+app.use("/uploads/product",express.static("uploads/product"))
+
 
 
 

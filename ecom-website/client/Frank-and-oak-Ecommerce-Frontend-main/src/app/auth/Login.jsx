@@ -3,7 +3,7 @@ import { IoCloseSharp } from "react-icons/io5";
 import { FaFacebookF } from "react-icons/fa";
 import { FaGoogle } from "react-icons/fa";
 import { BsArrowRight } from "react-icons/bs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -17,7 +17,10 @@ export default function Login({ loginStatus, setLoginStatus }) {
   return (
     <section className={` ${loginStatus ? "block" : "hidden"} w-full h-screen flex bg-[rgba(0,0,0,0.4)] items-center justify-center  fixed  left-0 top-0 z-[9999999]`}>
       <div className={`${loginStatus ? "opacity-100 translate-y-0 duration-500 " : "opacity-0 -translate-y-full duration-500 "} relative lg:w-[42%] md:w-[80%] w-full h-screen md:h-[700px] overflow-scroll  px-10 pt-5 pb-8 bg-[#F9F9F9] overflow-x-hidden mt-5`}>
-        <button onClick={() => setLoginStatus(false)} className=" z-[999999999] absolute top-3 right-3" >
+        <button onClick={() => {
+          
+          setLoginStatus(false)
+        }} className=" z-[999999999] absolute top-3 right-3" >
           <IoCloseSharp className="w-8 h-8" />
         </button>
         <div className='text-center'>
@@ -46,7 +49,7 @@ export default function Login({ loginStatus, setLoginStatus }) {
           </div>
         </div>
         {compStatus ?
-          <LoginBox /> :
+          <LoginBox setLoginStatus={setLoginStatus} /> :
 
           <SignUpBox setCompStatus={setCompStatus} compStatus={compStatus} otpAfterSignUp={otpAfterSignUp} setotpAfterSignUp={setotpAfterSignUp} />}
 
@@ -84,7 +87,7 @@ export default function Login({ loginStatus, setLoginStatus }) {
 }
 
 
-function LoginBox() {
+function LoginBox({setLoginStatus}) {
   let apiBaseUrl=process.env.NEXT_PUBLIC_APIURL;
   let router=useRouter()
   let dispatch=useDispatch()
@@ -104,8 +107,10 @@ function LoginBox() {
     .then((res)=>{
         if(res.data.status){
          
-           dispatch(saveLoginDetails(res.data.loginDataCheckEmail))
+           dispatch(saveLoginDetails({user:res.data.loginDataCheckEmail,token:res.data.token}))
+           
            router.push('/user-dashboard/account')
+           setLoginStatus(false)
         }
         else{
           alert(res.data.mgs)

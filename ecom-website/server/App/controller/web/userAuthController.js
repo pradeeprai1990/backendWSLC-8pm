@@ -1,6 +1,7 @@
 const { transporter } = require("../../config/mailConfig");
 const userModel = require("../../model/userModel");
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
 const saltRounds = 10;
 
 
@@ -82,11 +83,18 @@ let login=async (req,res)=>{
                         //pradeep123
         let passwordCheck=bcrypt.compareSync(req.body.password, userDbPassword); // true
         if(passwordCheck){
+
+            var token = jwt.sign({user:loginDataCheckEmail} , process.env.TOKENKEY);
+
+            console.log(token);
+
             let resObj={
                 status:1,
                 mgs:"Login",
+                token,
                 loginDataCheckEmail
              }
+             
                 res.status('200').json(resObj)
         }
         else{
@@ -125,4 +133,46 @@ let login=async (req,res)=>{
     // }
 }
 
-module.exports={createUser,login,sendOTP}
+let changePassword=async (req,res)=>{
+
+    let token=req.headers.authorization;
+    let myToken=token.split(" ")[1]
+    var decoded = jwt.verify(myToken, process.env.TOKENKEY);
+
+    let id=decoded.user._id //ID
+   
+    let checkMyIdData=await userModel.findOne({_id:id})
+    if(checkMyIdData){
+        let userDbPassword= checkMyIdData.password 
+       
+        let passwordCheck=bcrypt.compareSync(req.body.oldPassword, userDbPassword);
+        
+        if(passwordCheck){
+           //
+           const salt = bcrypt.genSaltSync(saltRounds); //10
+           const password = bcrypt.hashSync(req.body.newPassword, salt);
+           let userRes= await userModel.updateOne({_id:id},{$set:{password}}) 
+           let resObj={
+            status:0,
+            mgs:"Password Change",
+            userRes
+            
+         }
+         res.status('200').json(resObj)
+           
+        }
+        else{
+            let resObj={
+                status:0,
+                mgs:"Invalid Old Password",
+                
+             }
+             res.status('200').json(resObj)
+        }
+
+    }
+
+   
+}
+
+module.exports={createUser,login,sendOTP,changePassword}

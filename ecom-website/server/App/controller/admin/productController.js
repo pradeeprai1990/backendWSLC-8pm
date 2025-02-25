@@ -5,7 +5,7 @@ const colorModel = require("../../model/colorModel")
 const subcategoryModel = require("../../model/subCategoryModel")
 const productModel = require("../../model/productModels")
 let productAdd = async (req, res) => {
-    let { productName, productDescription, productShortDescription, productPrice, productMRP, parentCategory, subCategory, productSize, productColors, status } = req.body;
+    let { productName, productDescription, productShortDescription, productPrice, productMRP, parentCategory, subCategory, productSize, productColors, status,productFeatured } = req.body;
     let insertOBJ = {
         productName,
         productDescription,
@@ -16,7 +16,8 @@ let productAdd = async (req, res) => {
         subCategory,
         productSize,
         productColors,
-        status
+        productStatus:status,
+        productFeatured:productFeatured ?? 0,
 
     }
 
