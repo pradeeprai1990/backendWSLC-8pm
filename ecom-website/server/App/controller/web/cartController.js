@@ -9,14 +9,19 @@ let addtoCart = async (req, res) => {
     let user = req.user; //userId
 
     //Check Product Id color Id and Size Id with and condition
-    let cartData = await cartModel.find({ product: product, colorId: colorId, sizeId: sizeId, user: user })
+
+    let cartData = await cartModel.find(
+        { product: product, colorId: colorId, sizeId: sizeId, user: user }
+    )
+
+    // console.log(cartData)
     if (cartData.length > 0) {
         //Item add ready add in Cart
         let cartId = cartData[0]._id;
         await cartModel.updateOne({
             _id: cartId
         }, {
-            quantity: quantity+1
+            quantity: cartData[0].quantity+1
         })
         res.send({
             status: 1,
@@ -50,6 +55,7 @@ let getCart=async (req,res)=>{
         res.send({
                         status:1,
                         msg:"Data Found",
+                        staticPath:"uploads/product/",
                         data:data
                     })
     }
@@ -79,6 +85,77 @@ let getCart=async (req,res)=>{
 }
 
 let deleteCart=(req,res)=>{
+    let id=req.params.id
+
+    console.log(id)
+
+    cartModel.deleteOne({_id:id}).then((result)=>{
+
+        res.send({
+            status:1,
+                   msg:"Cart Deleted"
+
+        })
+    }).catch((err)=>{
+        res.send({
+            status:0,
+            msg:"Cart Not Deleted"
+        })
+    })
+    
+    // let deleteRes=await cartModel.deleteOne({_id:id})
+    // if(deleteRes){
+    //     res.send({
+    //         status:1,
+    //         msg:"Cart Deleted"
+    //     })
+    // }
+    // else{
+    //     res.send({
+    //         status:0,
+    //         msg:"Cart Not Deleted"
+    //     })
+    // }
+
+
+    // cartModel.deleteOne({_id:id},(err,result)=>{
+    //     if(err){
+    //         res.send({
+    //             status:0,
+    //             msg:"Cart Not Deleted"
+    //         })
+    //     }
+    //     else{
+    //         res.send({
+    //             status:1,
+    //             msg:"Cart Deleted"
+    //         })
+    //     }
+    // })
+
 
 }
-module.exports = { addtoCart,getCart }
+
+let changeQty=async (req,res)=>{
+    let id=req.params.id;
+    let qty=req.body.qty;
+
+    let updateQty=await cartModel.updateOne({_id:id},{
+        quantity:qty
+    })
+    if(updateQty){
+        res.send({
+            status:1,
+            msg:"Quantity Updated"
+        })
+    }
+    else{
+        res.send({
+            status:0,
+            msg:"Quantity Not Updated"
+        })
+    }
+
+}
+
+module.exports = { addtoCart,getCart,deleteCart,changeQty }

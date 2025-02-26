@@ -28,16 +28,17 @@ export let cartSlice= createSlice({
   
     initialState: {
         cartItems: [],
+       
         
     },
-
-
+   
     extraReducers: (builder) => {
         builder
           
           .addCase(fetchCart.fulfilled, (state, action) => {
             state.loading = false;
             state.cartItems = action.payload;
+            
           })
           
       },

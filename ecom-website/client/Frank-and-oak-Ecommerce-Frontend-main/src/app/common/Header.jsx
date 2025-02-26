@@ -22,10 +22,19 @@ export default function Header() {
   let userData=useSelector((store)=>store.userStore.userDetails)
 
 
-  let dispatch=useDispatch()
-
-  dispatch(fetchCart())
   
+
+  
+
+let dispatch=useDispatch()
+
+useEffect(()=>{
+  dispatch(fetchCart())
+},[])
+
+let cartData=useSelector((store)=>store.cartStore.cartItems.data)
+
+
 //  let cartData=useSelector(async (store)=>{
 //   let cartData=await  store.cartStore.cartItems
 //   console.log(cartData)
@@ -94,9 +103,11 @@ export default function Header() {
           <FaRegHeart className='sm:w-[22px] sm:h-7 h-5 w-[18px] cursor-pointer' />
             </Link>
           </li>
-          <li className='cursor-pointer' onClick={()=>setCartStatus(true)}>
+          <li className='cursor-pointer flex' onClick={()=>setCartStatus(true)}>
+            
           <BsBagPlus className='sm:w-[22px] sm:h-7 h-5 w-[18px]' />
           <Cart cartStatus={cartStatus} setCartStatus={setCartStatus} />
+          { cartData ? cartData.length : 0}
           </li>
         </ul>
       </nav>
