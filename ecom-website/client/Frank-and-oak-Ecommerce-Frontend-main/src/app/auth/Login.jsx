@@ -9,6 +9,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { saveLoginDetails } from "../slice/userSlice";
 import { useRouter } from "next/navigation";
+import { fetchCart } from "../slice/cartSlice";
 export default function Login({ loginStatus, setLoginStatus }) {
   let [compStatus, setCompStatus] = useState(true)
   let [otpAfterSignUp, setotpAfterSignUp] = useState(false)
@@ -110,6 +111,7 @@ function LoginBox({setLoginStatus}) {
            dispatch(saveLoginDetails({user:res.data.loginDataCheckEmail,token:res.data.token}))
            
            router.push('/user-dashboard/account')
+           dispatch(fetchCart())
            setLoginStatus(false)
         }
         else{

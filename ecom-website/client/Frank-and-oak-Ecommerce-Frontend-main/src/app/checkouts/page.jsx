@@ -1,9 +1,86 @@
 "use client"
-import React, { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
+import React, { use, useEffect, useState } from "react";
 import { IoBagHandleOutline } from "react-icons/io5";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
+import { useSelector } from "react-redux";
 export default function Checkout() {
-  let [orderSummary,setOrderSummary]=useState(false)
+  let router=useRouter()
+  let [orderSummary, setOrderSummary] = useState(false)
+  let userData = useSelector((store) => store.userStore.userDetails)
+  let [myAllQty, setMyAllQty] = useState(0)
+  let [total, setTotal] = useState(0)
+
+  let cartData = useSelector((store) => store.cartStore.cartItems.data)
+  let imagePath = useSelector((store) => store.cartStore.cartItems.staticPath)
+  let apiBaseUrl = process.env.NEXT_PUBLIC_APIURL;
+  let token =useSelector((store)=>store.userStore.token)
+
+
+  useEffect(() => {
+      if(cartData){
+        let myQty=0
+        let total=0
+        cartData.forEach((cartItems) => {
+          myQty+=cartItems.quantity
+         
+          total+=cartItems.quantity*cartItems.product.productMRP
+        })
+        setMyAllQty(myQty)  
+        setTotal(total)
+      }
+  }, [cartData])
+
+
+  let saveOrder=(event)=>{
+    event.preventDefault();
+    let shippingAddess={
+      country:event.target.country.value,
+      firstName:event.target.firstName.value,
+      lastName:event.target.lastName.value,
+      address:event.target.address.value,
+      City:event.target.City.value,
+      State:event.target.State.value,
+      ZIPCode:event.target.ZIPCode.value,
+      phone:event.target.phone.value,
+    }
+    let PayementType=event.target.PayementType.value;
+    let orderAmount=total;
+    let orderQty=myAllQty;
+    let shippingCharges=40
+    let myCart=cartData.map((item)=>item._id);
+    
+     let obj={
+      shippingAddess,
+      orderQty,
+      PayementType,
+      orderAmount,
+      shippingCharges,
+      myCart
+
+     }
+
+     axios.post(`${apiBaseUrl}web/order/saveorder`,obj,
+      {
+         headers: {Authorization : `Bearer ${token}`},
+      }
+    )
+    .then((res)=>{
+      if(res.data.status){
+        alert(res.data.message)
+        router.push('/thank-you')
+      }
+      else{
+       
+      }
+    })
+    
+  }
+    
+  // let Qty=cartData.map((cartItems,index)=>cartItems.quantity)
+
   return (
     <>
       <header className="w-full border-b border-customBorder py-2 font-Poppins">
@@ -12,18 +89,18 @@ export default function Checkout() {
           <IoBagHandleOutline size={30} />
         </div>
       </header>
-      <div onClick={()=>setOrderSummary(!orderSummary)} className="lg:hidden bg-[#F5F5F5] cursor-pointer w-full py-5 px-10 border-y flex items-center justify-between border-customBorder">
-            <div className="flex text-sm items-center gap-2">Show order summary {orderSummary ? <MdKeyboardArrowUp size={20}/> : <MdKeyboardArrowDown size={20}/>}</div>
-            <div className="text-[19px] font-semibold">$345.05</div>
-          </div>
+      <div onClick={() => setOrderSummary(!orderSummary)} className="lg:hidden bg-[#F5F5F5] cursor-pointer w-full py-5 px-10 border-y flex items-center justify-between border-customBorder">
+        <div className="flex text-sm items-center gap-2">Show order summary {orderSummary ? <MdKeyboardArrowUp size={20} /> : <MdKeyboardArrowDown size={20} />}</div>
+        <div className="text-[19px] font-semibold">$345.05</div>
+      </div>
       <section className="grid lg:grid-cols-[55%_auto] grid-cols-1 mx-auto font-Poppins">
         <div className="h-screen flex justify-end lg:order-1 order-2">
-          <form className="lg:w-[75%] w-full px-5 py-10 overflow-y-scroll h-screen scrollbar-hide">
+          <form onSubmit={saveOrder} className="lg:w-[75%] w-full px-5 py-10 overflow-y-scroll h-screen scrollbar-hide">
             <div>
-              <div className="text-sm font-normal text-[#707070] text-center">
+              {/* <div className="text-sm font-normal text-[#707070] text-center">
                 Express checkout
-              </div>
-              <div className=" flex justify-center py-3">
+              </div> */}
+              {/* <div className=" flex justify-center py-3">
                 <button
                   type="button"
                   class="text-gray-900 bg-[#F7BE38] hover:bg-[#F7BE38]/90 focus:ring-4 focus:outline-none focus:ring-[#F7BE38]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 mb-2"
@@ -90,15 +167,15 @@ export default function Checkout() {
                   <img className="me-2" src="images/dark_gpay.svg" alt="" />
                   Google Pay
                 </button>
-              </div>
+              </div> */}
             </div>
-            <div className="grid grid-cols-[46%_8%_46%] items-center justify-center">
+            {/* <div className="grid grid-cols-[46%_8%_46%] items-center justify-center">
               <div className="w-full h-[1px] bg-[#E7E7E7]"></div>
               <div className="text-center text-sm font-normal text-[#707070]">
                 OR
               </div>
               <div className="w-full h-[1px] bg-[#E7E7E7]"></div>
-            </div>
+            </div> */}
             <div className="border-b border-customBorder pb-3">
               <div className="flex items-center justify-between pt-8">
                 <div className="text-sm font-normal">Account</div>
@@ -107,35 +184,26 @@ export default function Checkout() {
                 </button>
               </div>
               <div className="text-sm font-normal py-2">
-                roshanchaurasia990@gmail.com
+                {userData.userEmail}
               </div>
               <button className="underline text-sm font-normal">Log out</button>
             </div>
-            <div className="cursor-pointer pt-3">
-              <input
-                id="checkbox"
-                type="checkbox"
-                className="form-checkbox checked:bg-black rounded-sm focus:ring-white text-black h-4 w-4 me-2"
-              />
-              <label className="text-sm font-normal" htmlFor="checkbox">
-                Email me with news and offers
-              </label>
-            </div>
+
             <div className="space-y-4 py-5">
               <h4 className="font-semibold text-[20px]">Delivery</h4>
-              <select
+              <input type="text"
                 className="w-full rounded-md py-3 text-sm border-customBorder focus:ring-customBorder"
                 name="country"
                 id="country"
-              >
-                <option value="India">India</option>
-                <option value="United States">United States</option>
-              </select>
+                placeholder="Country"
+              />
+              
               <div className="grid grid-cols-2 gap-2">
-              <div class="relative">
+                <div class="relative">
                   <input
                     type="text"
                     id="floating_filled"
+                    name="firstName"
                     class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
                     placeholder=" "
                   />
@@ -150,6 +218,7 @@ export default function Checkout() {
                   <input
                     type="text"
                     id="floating_filled"
+                    name="lastName"
                     class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
                     placeholder=" "
                   />
@@ -165,6 +234,7 @@ export default function Checkout() {
                 <input
                   type="Search"
                   id="floating_outlined"
+                  name="address"
                   class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                   placeholder=""
                 />
@@ -176,10 +246,11 @@ export default function Checkout() {
                 </label>
               </div>
               <div>
-              <div class="relative">
+                <div class="relative">
                   <input
                     type="text"
                     id="floating_filled"
+                    name="Apartment"
                     class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
                     placeholder=" "
                   />
@@ -196,6 +267,7 @@ export default function Checkout() {
                   <input
                     type="text"
                     id="floating_filled"
+                    name="City"
                     class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
                     placeholder=" "
                   />
@@ -206,17 +278,26 @@ export default function Checkout() {
                     City
                   </label>
                 </div>
-                <select className="w-full rounded-md py-3 text-sm border-customBorder focus:ring-customBorder" name="state" id="state">
-                  <option value="Prayagraj">Prayagraj</option>
-                  <option value="Prayagraj">Prayagraj</option>
-                  <option value="Prayagraj">Prayagraj</option>
-                  <option value="Prayagraj">Prayagraj</option>
-                  <option value="Prayagraj">Prayagraj</option>
-                </select>
                 <div class="relative">
                   <input
                     type="text"
                     id="floating_filled"
+                    name="State"
+                    class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
+                    placeholder=" "
+                  />
+                  <label
+                    for="floating_filled"
+                    class="absolute text-sm  duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto"
+                  >
+                    State
+                  </label>
+                </div>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="floating_filled"
+                    name="ZIPCode"
                     class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
                     placeholder=" "
                   />
@@ -229,55 +310,61 @@ export default function Checkout() {
                 </div>
               </div>
               <div class="relative">
-                  <input
-                    type="text"
-                    id="floating_filled"
-                    class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
-                    placeholder=" "
-                  />
-                  <label
-                    for="floating_filled"
-                    class="absolute text-sm  duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto"
-                  >
-                    Phone
-                  </label>
-                </div>
-            </div>
-            <div className="space-y-4 py-5">
-            <h4 className="font-semibold">Shipping method</h4>
-            <div className="bg-[#F5F5F5] text-sm font-normal text-[#707070] p-5">Enter your shipping address to view available shipping methods.</div>
-            <div className="flex justify-between">
-            <div className="cursor-pointer">
-              <input
-                id="checkbox2"
-                type="checkbox"
-                className="form-checkbox checked:bg-black rounded-sm focus:ring-white text-black h-4 w-4 me-2"
-              />
-              <label className="text-sm font-normal" htmlFor="checkbox2">
-                Shipping Protection
-              </label>
-            </div>
-            <div className="text-sm font-normal">$8.55</div>
-            </div>
-            </div>
-            <div className="space-y-4 py-5">
-            <h4 className="font-semibold">Remember me</h4>
-            <div>
-              <div className="border border-customBorder rounded-md p-4 ">
-              <div className="cursor-pointer">
-              <input
-                id="checkbox3"
-                type="checkbox"
-                className="form-checkbox checked:bg-black rounded-sm focus:ring-white text-black h-4 w-4 me-2"
-              />
-              <label className="text-sm font-normal" htmlFor="checkbox3">
-              Save my information for a faster checkout
-              </label>
-            </div>
+                <input
+                  type="text"
+                  id="floating_filled"
+                  name="phone"
+                  class="block rounded-md px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900  appearance-none  focus:outline-none focus:ring-0 peer border border-customBorder"
+                  placeholder=" "
+                />
+                <label
+                  for="floating_filled"
+                  class="absolute text-sm  duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto"
+                >
+                  Phone
+                </label>
               </div>
             </div>
+            <div className="space-y-4 py-5">
+              <h4 className="font-semibold">Payment Option</h4>
+              <div className="bg-[#F5F5F5] text-sm font-normal text-[#707070] p-5">Enter your shipping address to view available shipping methods.</div>
+              <div className="flex justify-between">
+                <div className="cursor-pointer">
+                  <div>
+                  <input
+                   
+                    type="radio"
+                    className="mr-2"
+                    name="PayementType"
+                    value={1}
+                   
+                  />
+
+                  <label className="text-sm font-normal" htmlFor="checkbox2">
+                   Cash
+                  </label>
+                  </div>
+                  <div>
+                  <input
+                   
+                    type="radio"
+                   className="mr-2"
+                   name="PayementType"
+                   value={2}
+                  />
+                  <label className="text-sm font-normal" htmlFor="checkbox2">
+                   Online Payment
+                  </label>
+                  </div>
+                </div>
+                
+              </div>
             </div>
-            <button className="bg-black text-white rounded-md w-full  font-semibold py-5" type="submit">Pay Now</button>
+            <div className="space-y-4 py-5">
+              
+            
+            </div>
+            <button className="bg-black text-white rounded-md w-full  font-semibold py-5" type="submit">Order Now</button>
             <div className="border-t border-customBorder mt-20">
               <div className="flex gap-3 py-3">
                 <p className="text-sm font-normal underline">Refund policy</p>
@@ -290,116 +377,34 @@ export default function Checkout() {
         <div className={`lg:block ${orderSummary ? "block" : "hidden"} h-screen duration-200 bg-[#F4F8F7] p-10 lg:order-2 order-1`}>
           <div className="lg:w-[75%] w-full">
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <figure className="relative border bg-[#E8F0EE] border-customBorder rounded-md px-2">
-                  <img
-                    src="https://cdn.shopify.com/s/files/1/0555/5722/6653/files/1910082-002.3037_64x64.jpg?v=1726773509"
-                    alt=""
-                  />
-                  <div className="absolute right-[-12%] top-[-12%] w-[20px] h-[20px] rounded-full text-[12px]  text-white bg-[#6B6D6D] flex justify-center items-center">
-                    2
+              {cartData && cartData.map((item, index) =>
+
+                <div key={index} className="flex items-center gap-3">
+                  <figure className="relative border bg-[#E8F0EE] border-customBorder rounded-md px-2">
+                    <img
+                      src={apiBaseUrl+imagePath + item.product.productImage}
+                      width={50}
+                      alt=""
+                    />
+                    <div className="absolute right-[-12%] top-[-12%] w-[20px] h-[20px] rounded-full text-[12px]  text-white bg-[#6B6D6D] flex justify-center items-center">
+                      {item.quantity}
+                    </div>
+                  </figure>
+                  <div className="flex items-center w-[80%] py-3 justify-between gap-5">
+                    <div>
+                      <h6 className="text-sm font-normal">
+                        {item.product.productName}
+                      </h6>
+                      <span className="text-[12px] font-normal text-[#0000008f]">
+                        {item.sizeId.sizeName}
+                      </span>
+                    </div>
+                    <div className="text-sm font-normal">rs {item.product.productMRP} </div>
                   </div>
-                </figure>
-                <div className="flex items-center w-[80%] py-3 justify-between gap-5">
-                  <div>
-                    <h6 className="text-sm font-normal">
-                      The Classic Tie in Black
-                    </h6>
-                    <span className="text-[12px] font-normal text-[#0000008f]">
-                      One Size
-                    </span>
-                  </div>
-                  <div className="text-sm font-normal">$39.50</div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <figure className="relative border bg-[#E8F0EE] border-customBorder rounded-md px-2">
-                  <img
-                    src="https://cdn.shopify.com/s/files/1/0555/5722/6653/files/1910082-002.3037_64x64.jpg?v=1726773509"
-                    alt=""
-                  />
-                  <div className="absolute right-[-12%] top-[-12%] w-[20px] h-[20px] rounded-full text-[12px]  text-white bg-[#6B6D6D] flex justify-center items-center">
-                    2
-                  </div>
-                </figure>
-                <div className="flex items-center w-[80%] py-3 justify-between gap-5">
-                  <div>
-                    <h6 className="text-sm font-normal">
-                      The Classic Tie in Black
-                    </h6>
-                    <span className="text-[12px] font-normal text-[#0000008f]">
-                      One Size
-                    </span>
-                  </div>
-                  <div className="text-sm font-normal">$39.50</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <figure className="relative border bg-[#E8F0EE] border-customBorder rounded-md px-2">
-                  <img
-                    src="https://cdn.shopify.com/s/files/1/0555/5722/6653/files/1910082-002.3037_64x64.jpg?v=1726773509"
-                    alt=""
-                  />
-                  <div className="absolute right-[-12%] top-[-12%] w-[20px] h-[20px] rounded-full text-[12px]  text-white bg-[#6B6D6D] flex justify-center items-center">
-                    2
-                  </div>
-                </figure>
-                <div className="flex items-center w-[80%] py-3 justify-between gap-5">
-                  <div>
-                    <h6 className="text-sm font-normal">
-                      The Classic Tie in Black
-                    </h6>
-                    <span className="text-[12px] font-normal text-[#0000008f]">
-                      One Size
-                    </span>
-                  </div>
-                  <div className="text-sm font-normal">$39.50</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <figure className="relative border bg-[#E8F0EE] border-customBorder rounded-md px-2">
-                  <img
-                    src="https://cdn.shopify.com/s/files/1/0555/5722/6653/files/1910082-002.3037_64x64.jpg?v=1726773509"
-                    alt=""
-                  />
-                  <div className="absolute right-[-12%] top-[-12%] w-[20px] h-[20px] rounded-full text-[12px]  text-white bg-[#6B6D6D] flex justify-center items-center">
-                    2
-                  </div>
-                </figure>
-                <div className="flex items-center w-[80%] py-3 justify-between gap-5">
-                  <div>
-                    <h6 className="text-sm font-normal">
-                      The Classic Tie in Black
-                    </h6>
-                    <span className="text-[12px] font-normal text-[#0000008f]">
-                      One Size
-                    </span>
-                  </div>
-                  <div className="text-sm font-normal">$39.50</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <figure className="relative border bg-[#E8F0EE] border-customBorder rounded-md px-2">
-                  <img
-                    src="https://cdn.shopify.com/s/files/1/0555/5722/6653/files/1910082-002.3037_64x64.jpg?v=1726773509"
-                    alt=""
-                  />
-                  <div className="absolute right-[-12%] top-[-12%] w-[20px] h-[20px] rounded-full text-[12px]  text-white bg-[#6B6D6D] flex justify-center items-center">
-                    2
-                  </div>
-                </figure>
-                <div className="flex items-center w-[80%] py-3 justify-between gap-5">
-                  <div>
-                    <h6 className="text-sm font-normal">
-                      The Classic Tie in Black
-                    </h6>
-                    <span className="text-[12px] font-normal text-[#0000008f]">
-                      One Size
-                    </span>
-                  </div>
-                  <div className="text-sm font-normal">$39.50</div>
-                </div>
-              </div>
+              )}
+
+
             </div>
             <div className="border-t border-[#E3E3E3] py-5 mt-5">
               <form className="grid grid-cols-[80%_auto] gap-4">
@@ -414,22 +419,22 @@ export default function Checkout() {
               </form>
               <div className="pt-5 space-y-3">
                 <div className="flex justify-between ">
-                  <div className="text-sm font-normal">Subtotal • 7 items</div>
-                  <div className="text-sm font-normal">$336.50</div>
+                  <div className="text-sm font-normal">Subtotal • {myAllQty} items</div>
+                  <div className="text-sm font-normal">Rs {total} </div>
                 </div>
                 <div className="flex justify-between">
                   <div className="text-sm font-normal">Shipping</div>
                   <div className="text-sm font-normal text-[#0000008f]">
-                    Enter shipping address
+                    shipping Charge Rs 40
                   </div>
                 </div>
                 <div className="flex justify-between pt-5">
                   <div className=" text-[19px] font-semibold">Total</div>
                   <div className="font-semibold  text-[19px]">
                     <span className="text-sm text-[#0000008f] font-normal">
-                      USD
+                      Rs
                     </span>{" "}
-                    $336.50
+                    {total + 40}
                   </div>
                 </div>
               </div>
