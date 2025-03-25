@@ -1,10 +1,40 @@
+"use client"
 import BreadCrumb from "@/app/common/BreadCrumb";
 import Header from "@/app/common/Header";
-import React from "react";
+
 import { AccountSideBar } from "../account/page";
-import { Link } from "lucide-react";
+
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux';
+import Link from "next/link";
+
+
 
 export default function Order() {
+
+  let [order,setOrder]=useState([])
+
+  let apiBaseUrl=process.env.NEXT_PUBLIC_APIURL;
+  let token =useSelector((store)=>store.userStore.token)  
+let myOrder=()=>{
+  console.log("hello")
+  axios.get(`${apiBaseUrl}web/order/view-order`,
+    {
+       headers: {Authorization : `Bearer ${token}`},
+    }
+  )
+  .then((res)=>{
+    if(res.data.status){
+      setOrder(res.data.data)
+    }
+    
+  })
+}
+
+useEffect(()=>{
+  myOrder()
+},[])
   return (
     <>
       <section className="pt-28 px-[30px]">
@@ -51,10 +81,9 @@ export default function Order() {
     <div className="mx-auto max-w-5xl">
       <div className="mt-6 flow-root sm:mt-8">
         <div className="divide-y divide-gray-200 space-y-5">
-          <OrderCard/>
-          <OrderCard/>
-          <OrderCard/>
-          <OrderCard/>
+          {order.map((data,index)=><OrderCard data={data} key={index}/>)}
+       
+         
         </div>
       </div>
 
@@ -77,36 +106,40 @@ export default function Order() {
 }
 
 
-function OrderCard() {
+function OrderCard({data}) {
   return (
     <div className="flex flex-wrap items-center gap-y-4 py-6 border rounded-xl shadow-md px-5">
             <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt className="text-base font-medium text-gray-500 ">Order ID:</dt>
               <dd className="mt-1.5 text-base font-semibold text-gray-900 ">
-                <a href="#" className="hover:underline">#FWB159873546</a>
+                <a href="#" className="hover:underline">${data._id}</a>
               </dd>
             </dl>
 
             <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt className="text-base font-medium text-gray-500 ">Date:</dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 ">04.06.2023</dd>
+              <dd className="mt-1.5 text-base font-semibold text-gray-900 ">{data.createdAt.split("T")[0]}</dd>
             </dl>
 
             <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt className="text-base font-medium text-gray-500 ">Price:</dt>
-              <dd className="mt-1.5 text-base font-semibold text-gray-900 ">$90</dd>
+              <dd className="mt-1.5 text-base font-semibold text-gray-900 ">Rs {data.orderAmount}</dd>
             </dl>
 
             <dl className="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt className="text-base font-medium text-gray-500 ">Status:</dt>
-              <Confirmed/>
+              <dt className="text-base font-medium text-gray-500 ">Status: </dt>
+              {data.orderStatus}
               {/* <Cancelled/> */}
               {/* <InTransit/> */}
             </dl>
 
             <div className="w-full grid sm:grid-cols-2 lg:flex lg:w-64 lg:items-center lg:justify-end gap-4">
               <button type="button" className="w-full rounded-lg bg-black px-3 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300  lg:w-auto">Order again</button>
-              <button className="w-full inline-flex justify-center rounded-lg  border border-gray-200 bg-[#EBECEE] px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100  lg:w-auto">View details</button>
+             
+             <Link href={`/user-dashboard/order/order-details/${data._id}`}>
+                View Details
+            
+              </Link>
             </div>
           </div>
   )

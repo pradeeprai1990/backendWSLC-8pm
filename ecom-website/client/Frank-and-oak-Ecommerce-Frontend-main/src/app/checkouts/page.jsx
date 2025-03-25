@@ -4,9 +4,13 @@ import { useRouter } from "next/navigation";
 
 import React, { use, useEffect, useState } from "react";
 import { IoBagHandleOutline } from "react-icons/io5";
+import { useRazorpay } from "react-razorpay";
+
+
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 import { useSelector } from "react-redux";
 export default function Checkout() {
+  const {Razorpay} = useRazorpay();
   let router=useRouter()
   let [orderSummary, setOrderSummary] = useState(false)
   let userData = useSelector((store) => store.userStore.userDetails)
@@ -34,6 +38,8 @@ export default function Checkout() {
   }, [cartData])
 
 
+  console.log(cartData)
+
   let saveOrder=(event)=>{
     event.preventDefault();
     let shippingAddess={
@@ -50,7 +56,7 @@ export default function Checkout() {
     let orderAmount=total;
     let orderQty=myAllQty;
     let shippingCharges=40
-    let myCart=cartData.map((item)=>item._id);
+    //  let myCart=cartData.map((item)=>item._id);
     
      let obj={
       shippingAddess,
@@ -58,7 +64,7 @@ export default function Checkout() {
       PayementType,
       orderAmount,
       shippingCharges,
-      myCart
+      myCart:cartData
 
      }
 
@@ -68,12 +74,46 @@ export default function Checkout() {
       }
     )
     .then((res)=>{
-      if(res.data.status){
-        alert(res.data.message)
+      if(res.data.status && res.data.paymentMethod==1){
+        //  alert(res.data.message)
         router.push('/thank-you')
       }
-      else{
-       
+      else if(res.data.status && res.data.paymentMethod==2){
+        console.log(res.data.razorpayorder)
+        const options = {
+          key: "rzp_test_WAft3lA6ly3OBc",
+          amount: res.data.razorpayorder.amount,
+          currency: "INR",
+          name: "Frank And Oak",
+          description: "Test Transaction",
+          image: "https://www.wscubetech.com/images/ws-cube-white-logo.svg",
+          order_id: res.data.razorpayorder.id,
+          handler: function (response) {
+              
+              axios.post(`${apiBaseUrl}web/order/verify-order`,response,
+                {
+                  headers: {Authorization : `Bearer ${token}`},
+               }
+              )
+              .then((res)=>{
+                if(res.data.status){
+                  router.push('/thank-you')
+                }
+              })
+              //Response from Razorpay
+          },
+          prefill: {
+            name: "John Doe",
+            email: "john.doe@example.com",
+            contact: "9999999999",
+          },
+          theme: {
+            color: "#194cff",
+          },
+        }
+        let rzp = new Razorpay(options);
+        rzp.open();
+
       }
     })
     

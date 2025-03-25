@@ -4,7 +4,7 @@ import Header from '@/app/common/Header'
 import { logOut } from '@/app/slice/userSlice'
 import axios from 'axios'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CiHeart } from "react-icons/ci";
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -35,6 +35,26 @@ export default function Account() {
     event.preventDefault()
 
   }
+
+  let myOrder=()=>{
+    axios.get(`${apiBaseUrl}web/order/view-order`,
+      {
+         headers: {Authorization : `Bearer ${token}`},
+      }
+    )
+    .then((res)=>{
+      if(res.data.status){
+        console.log(res.data.data)
+      }
+      
+    })
+  }
+
+  useEffect(()=>{
+    myOrder()
+  },[])
+
+
   return (
     <>
       <section className="pt-28 px-[30px]">

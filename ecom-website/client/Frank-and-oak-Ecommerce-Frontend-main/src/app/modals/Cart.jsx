@@ -15,7 +15,7 @@ export default function Cart({cartStatus,setCartStatus}) {
 let cartData=useSelector((store)=>store.cartStore.cartItems.data)
 
 let imagePath=useSelector((store)=>store.cartStore.cartItems.staticPath)
-console.log(imagePath)
+
 
 
   return (
@@ -59,7 +59,7 @@ function CartProducts({cartItems,imagePath}) {
   const token = Cookies.get("token");
   let [qty,setQty]=useState(cartItems.quantity)
 
-  console.log(cartItems)
+
   let apiBaseUrl=process.env.NEXT_PUBLIC_APIURL;
   let {product}=cartItems
   let {sizeId}=cartItems

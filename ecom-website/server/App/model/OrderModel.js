@@ -1,11 +1,7 @@
 let mongoose=require('mongoose');
 let orderSchema=new mongoose.Schema(
 {
-    orderItems:[
-        {
-            type: mongoose.Types.ObjectId, ref: "cart"
-        }
-    ],
+    orderItems:[],
     shippingAddess:{
         type:Object,
     },
@@ -19,6 +15,12 @@ let orderSchema=new mongoose.Schema(
         enum : ["1","2","3"], //
         default:1,
        
+    },
+    razorpayOrderId:{
+        type:String,
+    },
+    razorpayPayment:{
+        type:String,
     },
     orderAmount:{
         type:Number,

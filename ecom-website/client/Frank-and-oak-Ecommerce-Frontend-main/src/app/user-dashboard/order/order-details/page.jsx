@@ -1,6 +1,11 @@
-import React from 'react'
+"use client"
+import axios from 'axios';
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux';
 
 export default function OrderDetails() {
+  
+
   return (
     <section className="py-24 relative">
     <div className="w-full max-w-7xl px-4 md:px-5 lg-6 mx-auto">
